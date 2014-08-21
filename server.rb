@@ -1,22 +1,11 @@
 require 'sinatra'
 require 'csv'
 
-def csv_import
+def init
   @articles = []
 
   CSV.foreach('public/articles.csv', headers: true, :header_converters => :symbol) do |row|
     @articles << row.to_hash
-  end
-end
-
-def init
-  csv_import
-
-  choice = params[:article]
-  @titles = []
-
-  @articles.each do |article|
-    @titles << article[:title]
   end
 end
 
