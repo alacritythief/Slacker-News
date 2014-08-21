@@ -1,0 +1,10 @@
+<div class="articles">
+  <ol>
+    <% @articles.each do |article| %>
+      <li>
+        <p><a href="http://<%= article[:url] %>" target="_blank"><%= article[:title] %></a> (<%= article[:url] %>)</p>
+        <p class="comment"><%= article[:description] %></a></p>
+      </li>
+    <% end %>
+  </ol>
+</div>
