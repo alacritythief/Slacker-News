@@ -1,21 +1,42 @@
 require 'sinatra'
-require 'csv'
+require 'redis'
+require 'json'
 
-def init
-  @articles = []
-
-  CSV.foreach('public/articles.csv', headers: true, :header_converters => :symbol) do |row|
-    @articles << row.to_hash
+def get_connection
+  if ENV.has_key?("REDISCLOUD_URL")
+    Redis.new(url: ENV["REDISCLOUD_URL"])
+  else
+    Redis.new
   end
 end
 
+def find_articles
+  redis = get_connection
+  serialized_articles = redis.lrange("slacker:articles", 0, -1)
+
+  @articles = []
+
+  serialized_articles.each do |article|
+    @articles << JSON.parse(article, symbolize_names: true)
+  end
+
+  @articles
+end
+
+def save_article(url, title, description)
+  article = { url: url, title: title, description: description }
+
+  redis = get_connection
+  redis.rpush("slacker:articles", article.to_json)
+end
+
 get '/' do
-  init
+  find_articles
   erb :articles
 end
 
 get '/submit' do
-  init
+  find_articles
   erb :submit
 end
 
@@ -24,9 +45,7 @@ post '/submit' do
   url = params['url']
   des = params['description']
 
-  File.open('public/articles.csv', 'a') do |article|
-    article.puts("#{title},#{url},#{des}")
-  end
+  save_article(url, title, des)
 
   redirect '/'
 end
