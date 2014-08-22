@@ -36,7 +36,6 @@ get '/' do
 end
 
 get '/submit' do
-  find_articles
   erb :submit
 end
 
