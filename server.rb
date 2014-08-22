@@ -19,7 +19,7 @@ def find_articles
   serialized_articles.each do |article|
     @articles << JSON.parse(article, symbolize_names: true)
   end
-
+  redis.quit
   @articles
 end
 
